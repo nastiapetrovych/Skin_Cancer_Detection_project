@@ -62,6 +62,14 @@ def process_synthetic_dataset(target_dir):
     extraction_dir = os.path.join(target_dir, "images")
     os.makedirs(extraction_dir, exist_ok=True)
 
+    label_mapping = {
+        0: 0,  # Benign
+        1: 1,  # Malignant
+        2: 1,  # Malignant
+        3: 0,  # Benign
+        4: 0   # Benign
+    }
+
     # Process each split (e.g., train, test)
     for split in ds:
         output_csv_path = os.path.join(target_dir, f"{split}.csv")
@@ -70,9 +78,7 @@ def process_synthetic_dataset(target_dir):
         print(f"Processing {split} split...")
         print(f"Columns in the dataset: {df.columns.tolist()}")
 
-        # Check for the presence of the 'image' column
-        if 'image' not in df.columns:
-            raise ValueError(f"The expected column 'image' is missing in the {split} split.")
+        df["label"] = df["label"].map(label_mapping)
 
         # Extract ZIP paths from the 'image' column
         def get_zip_path(image_dict):

@@ -1,20 +1,18 @@
 import torch
 from torch.optim import AdamW
 from torch.nn import CrossEntropyLoss
-from data_preprocessing import HairRemovalTransform
 from dataset_utils import prepare_combined_dataset
-from model import ResNetBase
 from training_utils import train_and_evaluate
 from visualization import visualize_metrics
+from models import ResNetBase
 
 if __name__ == "__main__":
     # Define paths and hyperparameters
     DATASET_PATHS = {
-        "isic2020": "./dataset/isic2020/jpeg",
-        "isic2024": "./dataset/isic2024/train-image",
-        "synthetic": "./dataset/synthetic/images",
+        "ISIC2020": "./dataset/isic2020",
+        "ISIC2024": "./dataset/isic2024",
+        "Synthetic": "./dataset/synthetic",
     }
-    ROOT_DIR = "./dataset"
     NUM_WORKERS = 8
     BATCH_SIZE = 32
     IMG_SIZE = 224
@@ -24,7 +22,7 @@ if __name__ == "__main__":
 
     # Prepare data loaders
     train_loader, valid_loader, test_loader = prepare_combined_dataset(
-        DATASET_PATHS, ROOT_DIR, BATCH_SIZE, NUM_WORKERS
+        DATASET_PATHS, BATCH_SIZE, NUM_WORKERS
     )
 
     # Initialize model, optimizer, and criterion

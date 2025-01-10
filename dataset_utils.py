@@ -1,11 +1,15 @@
 import os
 import cv2
+import pydicom
 from torch.utils.data import DataLoader, Dataset
 from sklearn.model_selection import train_test_split
 from torchvision import transforms
 from PIL import Image
 import pandas as pd
 import numpy as np
+
+import warnings
+warnings.filterwarnings("ignore", message="Invalid value for VR UI:")
 
 def remove_hair(image):
     """
@@ -41,19 +45,35 @@ class CassavaDataset(Dataset):
     """
     Helper class for DataLoader to handle loading images and their corresponding labels.
     """
-    def __init__(self, df, data_path, transforms=None):
+    def __init__(self, df, dataset_paths, transforms=None):
+        """
+        Args:
+            df (pd.DataFrame): DataFrame containing image paths and labels.
+            dataset_paths (dict): Mapping from dataset source to base image paths.
+            transforms: Transformations to apply to images.
+        """
         super().__init__()
-        self.df_data = df.values
-        self.data_path = data_path
+        self.df_data = df
+        self.dataset_paths = dataset_paths
         self.transforms = transforms
 
     def __len__(self):
         return len(self.df_data)
 
     def __getitem__(self, index):
-        img_name, label = self.df_data[index]
-        img_path = os.path.join(self.data_path, f"{img_name}.jpg")
-        img = Image.open(img_path).convert("RGB")
+        # Extract data
+        row = self.df_data.iloc[index]
+        img_path = row["image_path"]
+        label = row.get("target", -1)  # Use -1 if no label is available (e.g., for test data)
+
+        # Load image
+        if img_path.endswith(".dcm"):
+            dicom = pydicom.dcmread(img_path)
+            img = dicom.pixel_array  # Extract pixel data
+            img = (img / img.max() * 255).astype(np.uint8)  # Normalize to 0-255
+            img = Image.fromarray(img).convert("RGB")  # Convert to RGB format
+        else:
+            img = Image.open(img_path).convert("RGB")  # Handle regular image files
 
         if self.transforms:
             img = self.transforms(img)
@@ -72,22 +92,22 @@ def combine_datasets(*datasets):
     """
     return pd.concat(datasets, ignore_index=True)
 
-def create_datasets(dataframes, data_paths, transforms_train, transforms_valid):
+def create_datasets(dataframes, dataset_paths, transforms_train, transforms_valid):
     """
     Create dataset objects for training, validation, and testing.
 
     Args:
         dataframes (dict): Dictionary containing train, validation, and test DataFrames.
-        data_paths (dict): Dictionary with paths to the respective datasets.
+        dataset_paths (dict): Dictionary with paths to the respective datasets.
         transforms_train: Transformations to apply to training data.
         transforms_valid: Transformations to apply to validation and test data.
 
     Returns:
         tuple: Train, validation, and test datasets.
     """
-    train_dataset = CassavaDataset(dataframes['train'], data_paths['train'], transforms=transforms_train)
-    valid_dataset = CassavaDataset(dataframes['valid'], data_paths['valid'], transforms=transforms_valid)
-    test_dataset = CassavaDataset(dataframes['test'], data_paths['test'], transforms=transforms_valid)
+    train_dataset = CassavaDataset(dataframes["train"], dataset_paths, transforms=transforms_train)
+    valid_dataset = CassavaDataset(dataframes["valid"], dataset_paths, transforms=transforms_valid)
+    test_dataset = CassavaDataset(dataframes["test"], dataset_paths, transforms=transforms_valid)
     return train_dataset, valid_dataset, test_dataset
 
 def initialize_dataloaders(train_dataset, valid_dataset, test_dataset, batch_size, num_workers):
@@ -154,21 +174,30 @@ def prepare_combined_dataset(dataset_paths, batch_size, num_workers):
         train_df = pd.read_csv(train_csv)
 
         # Add full image paths
-        train_df["image_path"] = train_df["image"].apply(lambda x: os.path.join(dataset_paths["Synthetic"], x))
-        train_df = train_df.rename(columns={"label": "target"})[["image_path", "target"]]
+        train_df = train_df.rename(columns={"image": "image_path", "label": "target"})[["image_path", "target"]]
 
         # Synthetic dataset does not have a test set
         return train_df, pd.DataFrame(columns=["image_path"])
+
+    def add_source_column(df, source):
+        df["source"] = source
+        return df
 
     # Load datasets
     isic2020_train, isic2020_test = load_isic2020()
     isic2024_train, _ = load_isic2024()
     synthetic_train, _ = load_synthetic()
 
+    # Add source identifiers
+    isic2020_train = add_source_column(isic2020_train, "ISIC2020")
+    isic2020_test = add_source_column(isic2020_test, "ISIC2020")
+    isic2024_train = add_source_column(isic2024_train, "ISIC2024")
+    synthetic_train = add_source_column(synthetic_train, "Synthetic")
+
     # Combine training data
     combined_train = pd.concat([isic2020_train, isic2024_train, synthetic_train], ignore_index=True)
 
-    # Combine test data (only ISIC2020 has test data)
+    # Combine test data
     combined_test = isic2020_test
 
     # Split combined training data into train and validation
@@ -176,16 +205,29 @@ def prepare_combined_dataset(dataset_paths, batch_size, num_workers):
         combined_train, test_size=0.2, stratify=combined_train["target"], random_state=42
     )
 
+    # Create DataFrames
     dataframes = {
         "train": train_data,
         "valid": valid_data,
         "test": combined_test,
     }
 
-    # Use the first dataset path as default for images
+    print("train_data dataframe info")
+    print(train_data.head())  # View first 5 rows
+    print(train_data.tail())  # View last 5 rows
+
+    print("valid_data dataframe info")
+    print(valid_data.head())  # View first 5 rows
+    print(valid_data.tail())  # View last 5 rows
+
+    print("combined_test dataframe info")
+    print(combined_test.head())  # View first 5 rows
+    print(combined_test.tail())  # View last 5 rows
+
+    # Create datasets and DataLoaders
     train_dataset, valid_dataset, test_dataset = create_datasets(
         dataframes,
-        {"train": dataset_paths["ISIC2024"], "valid": dataset_paths["ISIC2024"], "test": dataset_paths["ISIC2020"]},
+        dataset_paths,
         transforms_train,
         transforms_valid,
     )
