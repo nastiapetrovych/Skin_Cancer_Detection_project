@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 import zipfile
 from datasets import load_dataset
 from kaggle.api.kaggle_api_extended import KaggleApi
@@ -17,6 +18,37 @@ def unzip_all_in_directory(directory):
             print(f"Unzipped and cleaned up: {item_path}")
             # Call recursively in case there are more nested ZIPs
             unzip_all_in_directory(directory)
+
+def download_isic2020(dataset, target_dir):
+    # Download and unzip the dataset
+    api.dataset_download_files(dataset, path=target_dir, unzip=True)
+    
+    # Paths to train and test directories
+    train_dir = os.path.join(target_dir, "train", "malignant")
+    test_dir = os.path.join(target_dir, "test", "malignant")
+    
+    # Check if directories exist
+    if not os.path.exists(train_dir) or not os.path.exists(test_dir):
+        raise FileNotFoundError("The expected 'malignant' directories do not exist in the dataset structure.")
+
+    # Collect paths and labels
+    data = []
+    
+    for img_name in os.listdir(train_dir):
+        if img_name.endswith(('.jpg', '.jpeg', '.png')):  # Adjust extensions as needed
+            data.append({"image": os.path.join(target_dir, "train", "malignant", img_name), "label": 1})
+    
+    for img_name in os.listdir(test_dir):
+        if img_name.endswith(('.jpg', '.jpeg', '.png')):
+            data.append({"image": os.path.join(target_dir, "test", "malignant", img_name), "label": 1})
+    
+    # Create a DataFrame
+    df = pd.DataFrame(data)
+    
+    # Save to train.csv
+    csv_path = os.path.join(target_dir, "train.csv")
+    df.to_csv(csv_path, index=False)
+    print(f"'train.csv' created with {len(df)} malignant images at: {csv_path}")
 
 def download_competition(competition, target_dir):
     zip_path = f"{target_dir}/{competition}.zip"
@@ -120,7 +152,7 @@ api.authenticate()
 # Set directories
 download_dir = "./dataset"
 dataset_isic_2024 = "isic-2024-challenge"
-dataset_isic_2020 = "siim-isic-melanoma-classification"
+dataset_isic_2020 = "fanconic/skin-cancer-malignant-vs-benign"
 dataset_isic_2024_dir = f"{download_dir}/isic2024"
 dataset_isic_2020_dir = f"{download_dir}/isic2020"
 dataset_synthetic_dir = f"{download_dir}/synthetic"
@@ -132,7 +164,7 @@ os.makedirs(dataset_synthetic_dir, exist_ok=True)
 
 # Download ISIC datasets (2020 & 2024)
 download_competition(dataset_isic_2024, dataset_isic_2024_dir)
-download_competition(dataset_isic_2020, dataset_isic_2020_dir)
+download_isic2020(dataset_isic_2020, dataset_isic_2020_dir)
 
 # Process synthetic dataset
 process_synthetic_dataset(dataset_synthetic_dir)

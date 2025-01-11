@@ -144,85 +144,68 @@ def prepare_combined_dataset(dataset_paths, batch_size, num_workers):
 
     def load_isic2020():
         train_csv = os.path.join(dataset_paths["ISIC2020"], "train.csv")
-        test_csv = os.path.join(dataset_paths["ISIC2020"], "test.csv")
         train_df = pd.read_csv(train_csv)
-        test_df = pd.read_csv(test_csv)
+        train_df = train_df.rename(columns={"image": "image_path", "label": "target"})[["image_path", "target"]]
 
-        # Add image paths
-        train_df["image_path"] = train_df["image_name"].apply(lambda x: os.path.join(dataset_paths["ISIC2020"], "train", f"{x}.dcm"))
-        test_df["image_path"] = test_df["image_name"].apply(lambda x: os.path.join(dataset_paths["ISIC2020"], "test", f"{x}.dcm"))
-
-        train_df = train_df[["image_path", "target"]]
-        test_df = test_df[["image_path"]]
-
-        return train_df, test_df
+        return train_df
 
     def load_isic2024():
         train_csv = os.path.join(dataset_paths["ISIC2024"], "train-metadata.csv")
         train_df = pd.read_csv(train_csv)
-
-        # Add image paths
         train_df["image_path"] = train_df["isic_id"].apply(lambda x: os.path.join(dataset_paths["ISIC2024"], "train-image", "image", f"{x}.jpg"))
-
         train_df = train_df[["image_path", "target"]]
+        malignant_df = train_df[train_df["target"] == 1]
+        benign_df = train_df[train_df["target"] == 0].sample(n=7000, random_state=42)
+        combined_df = pd.concat([malignant_df, benign_df], axis=0).reset_index(drop=True)
 
-        # ISIC2024 does not have a separate test dataset
-        return train_df, pd.DataFrame(columns=["image_path"])
+        return combined_df
 
     def load_synthetic():
         train_csv = os.path.join(dataset_paths["Synthetic"], "train.csv")
         train_df = pd.read_csv(train_csv)
-
-        # Add full image paths
         train_df = train_df.rename(columns={"image": "image_path", "label": "target"})[["image_path", "target"]]
+        malignant_df = train_df[train_df["target"] == 1]
 
-        # Synthetic dataset does not have a test set
-        return train_df, pd.DataFrame(columns=["image_path"])
+        return malignant_df
 
     def add_source_column(df, source):
         df["source"] = source
         return df
 
     # Load datasets
-    isic2020_train, isic2020_test = load_isic2020()
-    isic2024_train, _ = load_isic2024()
-    synthetic_train, _ = load_synthetic()
+    isic2020_train = load_isic2020()
+    isic2024_train = load_isic2024()
+    synthetic_train = load_synthetic()
 
     # Add source identifiers
     isic2020_train = add_source_column(isic2020_train, "ISIC2020")
-    isic2020_test = add_source_column(isic2020_test, "ISIC2020")
     isic2024_train = add_source_column(isic2024_train, "ISIC2024")
     synthetic_train = add_source_column(synthetic_train, "Synthetic")
 
-    # Combine training data
-    combined_train = pd.concat([isic2020_train, isic2024_train, synthetic_train], ignore_index=True)
+    # Combine data
+    merged_dataset = pd.concat([isic2020_train, isic2024_train, synthetic_train], ignore_index=True)
 
-    # Combine test data
-    combined_test = isic2020_test
+    print("\nSummary:")
+    print(f"Total records with target == 0: {len(merged_dataset[merged_dataset['target'] == 0])}")
+    print(f"Total records with target == 1: {len(merged_dataset[merged_dataset['target'] == 1])}")
+    print("Record counts by source type:")
+    print(merged_dataset['source'].value_counts())
 
     # Split combined training data into train and validation
+    train_val_data, test_data = train_test_split(
+        merged_dataset, test_size=0.2, stratify=merged_dataset["target"], random_state=42
+    )
+
     train_data, valid_data = train_test_split(
-        combined_train, test_size=0.2, stratify=combined_train["target"], random_state=42
+        train_val_data, test_size=0.2, stratify=train_val_data['target'], random_state=42
     )
 
     # Create DataFrames
     dataframes = {
         "train": train_data,
         "valid": valid_data,
-        "test": combined_test,
+        "test": test_data,
     }
-
-    print("train_data dataframe info")
-    print(train_data.head())  # View first 5 rows
-    print(train_data.tail())  # View last 5 rows
-
-    print("valid_data dataframe info")
-    print(valid_data.head())  # View first 5 rows
-    print(valid_data.tail())  # View last 5 rows
-
-    print("combined_test dataframe info")
-    print(combined_test.head())  # View first 5 rows
-    print(combined_test.tail())  # View last 5 rows
 
     # Create datasets and DataLoaders
     train_dataset, valid_dataset, test_dataset = create_datasets(
