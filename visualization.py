@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 
-def visualize_metrics(train_losses, valid_losses, train_accuracies, valid_accuracies, num_epochs):
+def visualize_metrics(train_losses, valid_losses, train_accuracies, valid_accuracies, num_epochs, model_name, dataset_names):
     """
     Visualize training and validation metrics over epochs.
 
@@ -36,7 +36,7 @@ def visualize_metrics(train_losses, valid_losses, train_accuracies, valid_accura
     plt.grid(True)
 
     plt.tight_layout()
-    plt.savefig('training_validation_metrics.png', dpi=300, bbox_inches='tight')
+    plt.savefig(f'./results/metrics/training_validation_metrics_{model_name}_{dataset_names}.png', dpi=300, bbox_inches='tight')
     plt.show()
 
 def plot_roc_with_threshold(y_true, y_scores, threshold=0.8):

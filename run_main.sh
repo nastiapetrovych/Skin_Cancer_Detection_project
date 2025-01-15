@@ -6,6 +6,7 @@
 #SBATCH -t 24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --output=logs/slurm-%x.%j.out
+#SBATCH --exclude=falcon1,falcon2,falcon3
 
 module load any/python/3.8.3-conda
 eval "$(conda shell.bash hook)"

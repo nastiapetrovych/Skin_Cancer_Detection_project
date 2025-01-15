@@ -4,19 +4,21 @@ from torch.nn import CrossEntropyLoss
 from dataset_utils import prepare_combined_dataset
 from training_utils import train_and_evaluate
 from visualization import visualize_metrics
-from models import ResNetBase
+from models import EfficientNetBase, ResNetBase
 
 if __name__ == "__main__":
     # Define paths and hyperparameters
     DATASET_PATHS = {
         "ISIC2020": "./dataset/isic2020",
         "ISIC2024": "./dataset/isic2024",
-        "Synthetic": "./dataset/synthetic",
+        # "Synthetic": "./dataset/synthetic",
     }
+
+    DATASET_NAMES = "_".join(key.lower() for key in DATASET_PATHS.keys())
     NUM_WORKERS = 8
     BATCH_SIZE = 32
     IMG_SIZE = 224
-    NUM_EPOCHS = 20
+    NUM_EPOCHS = 10
     LEARNING_RATE = 1e-4
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -32,10 +34,10 @@ if __name__ == "__main__":
 
     # Train and evaluate
     train_losses, valid_losses, train_accuracies, valid_accuracies = train_and_evaluate(
-        model, train_loader, valid_loader, criterion, optimizer, DEVICE, NUM_EPOCHS
+        model, train_loader, valid_loader, criterion, optimizer, DEVICE, NUM_EPOCHS, DATASET_NAMES
     )
 
     # Visualize metrics
-    visualize_metrics(train_losses, valid_losses, train_accuracies, valid_accuracies, NUM_EPOCHS)
+    visualize_metrics(train_losses, valid_losses, train_accuracies, valid_accuracies, NUM_EPOCHS, model.name, DATASET_NAMES)
 
-    print("Training complete. Best model saved as 'best_model.pth'.")
+    print("Training complete. Best model saved under 'results/models'.")

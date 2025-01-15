@@ -142,17 +142,17 @@ def prepare_combined_dataset(dataset_paths, batch_size, num_workers):
         tuple: DataLoaders for training, validation, and testing.
     """
 
-    def load_isic2020():
-        train_csv = os.path.join(dataset_paths["ISIC2020"], "train.csv")
+    def load_isic2020(path):
+        train_csv = os.path.join(path, "train.csv")
         train_df = pd.read_csv(train_csv)
         train_df = train_df.rename(columns={"image": "image_path", "label": "target"})[["image_path", "target"]]
 
         return train_df
 
-    def load_isic2024():
-        train_csv = os.path.join(dataset_paths["ISIC2024"], "train-metadata.csv")
+    def load_isic2024(path):
+        train_csv = os.path.join(path, "train-metadata.csv")
         train_df = pd.read_csv(train_csv)
-        train_df["image_path"] = train_df["isic_id"].apply(lambda x: os.path.join(dataset_paths["ISIC2024"], "train-image", "image", f"{x}.jpg"))
+        train_df["image_path"] = train_df["isic_id"].apply(lambda x: os.path.join(path, "train-image", "image", f"{x}.jpg"))
         train_df = train_df[["image_path", "target"]]
         malignant_df = train_df[train_df["target"] == 1]
         benign_df = train_df[train_df["target"] == 0].sample(n=7000, random_state=42)
@@ -160,8 +160,8 @@ def prepare_combined_dataset(dataset_paths, batch_size, num_workers):
 
         return combined_df
 
-    def load_synthetic():
-        train_csv = os.path.join(dataset_paths["Synthetic"], "train.csv")
+    def load_synthetic(path):
+        train_csv = os.path.join(path, "train.csv")
         train_df = pd.read_csv(train_csv)
         train_df = train_df.rename(columns={"image": "image_path", "label": "target"})[["image_path", "target"]]
         malignant_df = train_df[train_df["target"] == 1]
@@ -172,18 +172,22 @@ def prepare_combined_dataset(dataset_paths, batch_size, num_workers):
         df["source"] = source
         return df
 
-    # Load datasets
-    isic2020_train = load_isic2020()
-    isic2024_train = load_isic2024()
-    synthetic_train = load_synthetic()
+    merged_dataset = pd.DataFrame()
 
-    # Add source identifiers
-    isic2020_train = add_source_column(isic2020_train, "ISIC2020")
-    isic2024_train = add_source_column(isic2024_train, "ISIC2024")
-    synthetic_train = add_source_column(synthetic_train, "Synthetic")
-
-    # Combine data
-    merged_dataset = pd.concat([isic2020_train, isic2024_train, synthetic_train], ignore_index=True)
+    # Load datasets, add source identifiers and create merged dataset
+    for dataset, path in dataset_paths.items():
+        if dataset == "ISIC2020":
+            isic2020_train = load_isic2020(path)
+            isic2020_train = add_source_column(isic2020_train, "ISIC2020")
+            merged_dataset = pd.concat([merged_dataset, isic2020_train], ignore_index=True)
+        if dataset == "ISIC2024":
+            isic2024_train = load_isic2024(path)
+            isic2024_train = add_source_column(isic2024_train, "ISIC2024")
+            merged_dataset = pd.concat([merged_dataset, isic2024_train], ignore_index=True)
+        if dataset == "Synthetic":
+            synthetic_train = load_synthetic(path)
+            synthetic_train = add_source_column(synthetic_train, "Synthetic")
+            merged_dataset = pd.concat([merged_dataset, synthetic_train], ignore_index=True)
 
     print("\nSummary:")
     print(f"Total records with target == 0: {len(merged_dataset[merged_dataset['target'] == 0])}")
