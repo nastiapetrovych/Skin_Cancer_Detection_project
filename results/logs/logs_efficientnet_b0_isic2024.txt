@@ -1,0 +1,72 @@
+Summary:
+Total records with target == 0: 7000
+Total records with target == 1: 393
+Record counts by source type:
+source
+ISIC2024    7393
+Name: count, dtype: int64
+
+Epoch 1/10
+--------------------
+Training: Loss = 0.2463, Accuracy = 0.9201
+Validation: Loss = 0.1598, Accuracy = 0.9510
+Validation accuracy improved from 0.0000 to 0.9510. Saving model...
+Time for epoch 1: 611.98 seconds
+
+Epoch 2/10
+--------------------
+Training: Loss = 0.1553, Accuracy = 0.9489
+Validation: Loss = 0.1546, Accuracy = 0.9526
+Validation accuracy improved from 0.9510 to 0.9526. Saving model...
+Time for epoch 2: 613.34 seconds
+
+Epoch 3/10
+--------------------
+Training: Loss = 0.1416, Accuracy = 0.9528
+Validation: Loss = 0.1512, Accuracy = 0.9535
+Validation accuracy improved from 0.9526 to 0.9535. Saving model...
+Time for epoch 3: 626.38 seconds
+
+Epoch 4/10
+--------------------
+Training: Loss = 0.1364, Accuracy = 0.9514
+Validation: Loss = 0.1417, Accuracy = 0.9577
+Validation accuracy improved from 0.9535 to 0.9577. Saving model...
+Time for epoch 4: 638.80 seconds
+
+Epoch 5/10
+--------------------
+Training: Loss = 0.1320, Accuracy = 0.9537
+Validation: Loss = 0.1341, Accuracy = 0.9577
+Time for epoch 5: 622.52 seconds
+
+Epoch 6/10
+--------------------
+Training: Loss = 0.1226, Accuracy = 0.9535
+Validation: Loss = 0.1453, Accuracy = 0.9552
+Time for epoch 6: 648.09 seconds
+
+Epoch 7/10
+--------------------
+Training: Loss = 0.1130, Accuracy = 0.9605
+Validation: Loss = 0.1434, Accuracy = 0.9527
+Time for epoch 7: 621.87 seconds
+
+Epoch 8/10
+--------------------
+Training: Loss = 0.1103, Accuracy = 0.9603
+Validation: Loss = 0.1485, Accuracy = 0.9544
+Time for epoch 8: 633.21 seconds
+
+Epoch 9/10
+--------------------
+Training: Loss = 0.1026, Accuracy = 0.9626
+Validation: Loss = 0.1383, Accuracy = 0.9544
+Time for epoch 9: 640.75 seconds
+
+Epoch 10/10
+--------------------
+Training: Loss = 0.0992, Accuracy = 0.9615
+Validation: Loss = 0.1720, Accuracy = 0.9282
+Time for epoch 10: 712.61 seconds
+Training complete. Best model saved under 'results/models'.

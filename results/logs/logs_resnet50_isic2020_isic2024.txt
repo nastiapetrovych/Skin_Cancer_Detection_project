@@ -1,0 +1,74 @@
+Summary:
+Total records with target == 0: 7000
+Total records with target == 1: 1890
+Record counts by source type:
+source
+ISIC2024    7393
+ISIC2020    1497
+Name: count, dtype: int64
+
+Epoch 1/10
+--------------------
+Training: Loss = 0.3463, Accuracy = 0.8657
+Validation: Loss = 0.3125, Accuracy = 0.9118
+Validation accuracy improved from 0.0000 to 0.9118. Saving model...
+Time for epoch 1: 2483.56 seconds
+
+Epoch 2/10
+--------------------
+Training: Loss = 0.2102, Accuracy = 0.9411
+Validation: Loss = 0.1947, Accuracy = 0.9431
+Validation accuracy improved from 0.9118 to 0.9431. Saving model...
+Time for epoch 2: 2530.12 seconds
+
+Epoch 3/10
+--------------------
+Training: Loss = 0.1727, Accuracy = 0.9449
+Validation: Loss = 0.1814, Accuracy = 0.9521
+Validation accuracy improved from 0.9431 to 0.9521. Saving model...
+Time for epoch 3: 2518.82 seconds
+
+Epoch 4/10
+--------------------
+Training: Loss = 0.1664, Accuracy = 0.9449
+Validation: Loss = 0.1745, Accuracy = 0.9535
+Validation accuracy improved from 0.9521 to 0.9535. Saving model...
+Time for epoch 4: 2531.64 seconds
+
+Epoch 5/10
+--------------------
+Training: Loss = 0.1582, Accuracy = 0.9486
+Validation: Loss = 0.1955, Accuracy = 0.9374
+Time for epoch 5: 2526.89 seconds
+
+Epoch 6/10
+--------------------
+Training: Loss = 0.1523, Accuracy = 0.9489
+Validation: Loss = 0.1579, Accuracy = 0.9618
+Validation accuracy improved from 0.9535 to 0.9618. Saving model...
+Time for epoch 6: 2677.69 seconds
+
+Epoch 7/10
+--------------------
+Training: Loss = 0.1451, Accuracy = 0.9501
+Validation: Loss = 0.1609, Accuracy = 0.9556
+Time for epoch 7: 2788.79 seconds
+
+Epoch 8/10
+--------------------
+Training: Loss = 0.1422, Accuracy = 0.9524
+Validation: Loss = 0.1695, Accuracy = 0.9576
+Time for epoch 8: 2692.57 seconds
+
+Epoch 9/10
+--------------------
+Training: Loss = 0.1400, Accuracy = 0.9525
+Validation: Loss = 0.1720, Accuracy = 0.9535
+Time for epoch 9: 2510.55 seconds
+
+Epoch 10/10
+--------------------
+Training: Loss = 0.1403, Accuracy = 0.9532
+Validation: Loss = 0.1721, Accuracy = 0.9541
+Time for epoch 10: 2571.24 seconds
+Training complete. Best model saved under 'results/models'.

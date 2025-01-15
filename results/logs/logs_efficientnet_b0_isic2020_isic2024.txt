@@ -1,0 +1,73 @@
+Summary:
+Total records with target == 0: 7000
+Total records with target == 1: 1890
+Record counts by source type:
+source
+ISIC2024    7393
+ISIC2020    1497
+Name: count, dtype: int64
+
+Epoch 1/10
+--------------------
+Training: Loss = 0.2147, Accuracy = 0.9309
+Validation: Loss = 0.5629, Accuracy = 0.9375
+Validation accuracy improved from 0.0000 to 0.9375. Saving model...
+Time for epoch 1: 702.55 seconds
+
+Epoch 2/10
+--------------------
+Training: Loss = 0.1467, Accuracy = 0.9511
+Validation: Loss = 0.1767, Accuracy = 0.9444
+Validation accuracy improved from 0.9375 to 0.9444. Saving model...
+Time for epoch 2: 823.97 seconds
+
+Epoch 3/10
+--------------------
+Training: Loss = 0.1251, Accuracy = 0.9554
+Validation: Loss = 0.1620, Accuracy = 0.9493
+Validation accuracy improved from 0.9444 to 0.9493. Saving model...
+Time for epoch 3: 783.52 seconds
+
+Epoch 4/10
+--------------------
+Training: Loss = 0.1223, Accuracy = 0.9547
+Validation: Loss = 0.1732, Accuracy = 0.9569
+Validation accuracy improved from 0.9493 to 0.9569. Saving model...
+Time for epoch 4: 789.29 seconds
+
+Epoch 5/10
+--------------------
+Training: Loss = 0.1169, Accuracy = 0.9604
+Validation: Loss = 0.1572, Accuracy = 0.9485
+Time for epoch 5: 834.35 seconds
+
+Epoch 6/10
+--------------------
+Training: Loss = 0.1062, Accuracy = 0.9650
+Validation: Loss = 0.1563, Accuracy = 0.9450
+Time for epoch 6: 921.83 seconds
+
+Epoch 7/10
+--------------------
+Training: Loss = 0.1021, Accuracy = 0.9661
+Validation: Loss = 0.1508, Accuracy = 0.9534
+Time for epoch 7: 1025.14 seconds
+
+Epoch 8/10
+--------------------
+Training: Loss = 0.0998, Accuracy = 0.9648
+Validation: Loss = 0.1671, Accuracy = 0.9514
+Time for epoch 8: 897.59 seconds
+
+Epoch 9/10
+--------------------
+Training: Loss = 0.0933, Accuracy = 0.9672
+Validation: Loss = 0.1724, Accuracy = 0.9444
+Time for epoch 9: 871.66 seconds
+
+Epoch 10/10
+--------------------
+Training: Loss = 0.0947, Accuracy = 0.9637
+Validation: Loss = 0.2152, Accuracy = 0.9535
+Time for epoch 10: 806.52 seconds
+Training complete. Best model saved under 'results/models'.
